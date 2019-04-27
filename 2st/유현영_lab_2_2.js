@@ -17,6 +17,8 @@ const server = http.createServer((req, res) => {
             "resultCsv": null
         };
 
+        console.log("바디에 담긴거 : " + body);
+        console.log("파싱해서 데이터에 담긴거 : " + data);
         if (err) {
             console.log(err);
             data.msg = "request err";
@@ -52,6 +54,7 @@ const server = http.createServer((req, res) => {
                         'Content-Type': "text/plain"
                     });
                     res.write(JSON.stringify(data));
+
                     res.end();
                 }
             })
