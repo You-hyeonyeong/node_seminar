@@ -10,4 +10,7 @@ module.exports = {
     MISS_MATCH_PW: "비밀번호가 맞지 않습니다.",
     LOGIN_SUCCESS: "로그인 성공",
     LOGIN_FAIL: "로그인 실패",
+
+    
+    ALREADY_POST: "이미 게시글이 존재합니다.",
 };
