@@ -13,4 +13,6 @@ module.exports = {
 
     
     ALREADY_POST: "이미 게시글이 존재합니다.",
+    REMOVED_BOARD : "게시글 지웠습니다.",
+    NO_POST : "해당 게시글 없습니다."
 };

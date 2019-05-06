@@ -1,18 +1,27 @@
 var express = require('express');
+var moment = require('moment');
+var async = require('async')
+require('moment-timezone');
 var csvWrite = require('../../module/csvManager/csvWrite');
 var csvRead = require('../../module/csvManager/csvRead');
+var csvDelete = require('../../module/csvManager/csvDelete');
+const cryptoModule = require('../../module/encrytion');
 
 var responseMessage = require('../../module/responseMessage');
+var statusCode = require('../../module/statusCode');
+var utils = require('../../module/utils');
+
 var router = express.Router();
 
 const fileName = '3hw.csv'
+
 
 router.get('/:id', async (req, res) => {
     const id = req.params.id;
     console.log(id);
     //게시글 고유 id가 id인 게시글 불러오기
     csvRead.csvRead(fileName).then((mesJsonArr) => {
-        var check = 0;
+        var check = 0; //중복값 체크하기
         for (const idx in mesJsonArr) {
             const jsonObj = mesJsonArr[idx];
             if (id == jsonObj.id) {
@@ -20,9 +29,8 @@ router.get('/:id', async (req, res) => {
                 check = 1;
             }
         }
-
         if (check == 0) {
-            res.write("no nono");
+            res.write("no no no");
         }
 
         // var check = null;
@@ -43,25 +51,24 @@ router.get('/:id', async (req, res) => {
 
     }, (err) => {
         console.log("eerrrrrrrr");
-
-
     })
 });
 
+//게시물 저장 (게시물 고유id, 게시물제목, 게시글 내용, 게시물 작성시간, 게시물 비밀번호, 솔트값)
+//같은 제목의 글이 있을 경우 실패 메시지 반환
+// jsondata = {
+//     "id" : "",
+//     "title" : "게시물1",
+//     "contents" : "게시물1내용",
+//     "time" : Date ,
+//     "pw" : "1234",
+//     "salt" : ""
+// }
 router.post('/', async (req, res) => {
-    //게시물 저장 (게시물 고유id, 게시물제목, 게시글 내용, 게시물 작성시간, 게시물 비밀번호, 솔트값)
-    //같은 제목의 글이 있을 경우 실패 메시지 반환
-    // jsondata = {
-    //     "id" : "",
-    //     "title" : "게시물1",
-    //     "contents" : "게시물1내용",
-    //     "time" : Date ,
-    //     "pw" : "1234",
-    //     "salt" : ""
-    // }
+
     const jsondata = req.body;
     csvRead.csvRead(fileName).then((mesJsonArr) => {
-        var check = 0; //0은 중복게시글 없을때 1은 중복게시글 있을때
+        var check = 0; //0 : 중복 게시글 없을때 1 : 중복 게시글 있을때
         for (const idx in mesJsonArr) {
             if (jsondata.title == mesJsonArr[idx].title) {
                 check = 1;
@@ -74,26 +81,63 @@ router.post('/', async (req, res) => {
             res.end();
             return
         }
-        //id추가하기 
-        jsondata.id = (parseInt(mesJsonArr[mesJsonArr.length-1].id)+1).toString()
-       //salt값 생성
-       //pw암호화
-       //salt와 pw추가 jsondata에
-        mesJsonArr.push(jsondata)
-        csvWrite.csvWrite(mesJsonArr, fileName);
+        //id 추가하기 
+        jsondata.id = (parseInt(mesJsonArr[mesJsonArr.length - 1].id) + 1).toString()
+        //게시물 작성 시간
+        moment.tz.setDefault("Asia/Seoul");
+        var date = moment().format('YYYY-MM-DD HH:mm:ss');
+        jsondata.time = date;
+        //salt값 생성
+        var pw = req.body.pw;
+        cryptoModule.encryption(pw, function (result) {
+            console.log(result);
+            
+            jsondata.salt = result.salt; //salt값 넣었구 ? 엥아니 왜 안들어 가는거야?
+            //salt와 pw추가 jsondata에
+            console.log(jsondata)
+            mesJsonArr.push(jsondata)
+            csvWrite.csvWrite(mesJsonArr, fileName);
+        });
+
+
     }, (err) => {
+        console.log(err);
 
     })
+
 });
 
-router.put('/', async (req, res) => {
+router.put('/:id', async (req, res) => {
     //게시글 수정 (게시물 고유 id같은 게시물을 수정된 값으로 다시 저장)
+    // csvRead.csvRead(fileName).then((mesJsonArr) => {
+    //     const id = req.params.id;
+    //     const title = req.body.title;
+    //     const contents = req.body.
+    //     for(const idx in mesJsonArr) {
+    //         if(id == mesJsonArr[idx].id) {
+                
+    //         }
+    //     }
+    // }, (err) => {
+
+    // })
 });
 
-router.delete('/', async (req, res) => {
+router.delete('/:id', async (req, res) => {
     //게시물 삭제 (게시문 고유id와 같은 게시물 삭제)
-
+    //순차적으로 각 작업결과 다음 작업으로 넘기는 async.waterfull 사용해보쟈
+    //csv파일 읽은다음에 id값 같은거 찾아서 지우기
+        csvRead.csvRead(fileName).then((mesJsonArr) => {
+            console.log(mesJsonArr);
+            const id = req.params.id;
+            csvDelete.csvDelete(mesJsonArr,id).then((jsonArr) =>{
+                console.log(jsonArr);
+                csvWrite.csvWrite(jsonArr, fileName);
+            },(err) => {
+                console.log("delete 안됨")
+            })
+        }, (err) => {
+            console.log("읽어오는거 안됨")
+        });
 });
-
-
 module.exports = router;
