@@ -1,9 +1,9 @@
 const fs = require('fs');
 const json2csv = require('json2csv');
 var csv = require("csvtojson");
-//다시만드는 모듈
-const csvDelete = {
-    csvDelete: (jsonArr, id) => {
+
+const csvEdit = {
+    csvEdit: (jsonArr, id) => {
         return new Promise((resolve, reject) => {
             if (jsonArr != null) {
                 for (const idx in jsonArr) {
@@ -23,4 +23,4 @@ const csvDelete = {
         })
     }
 }
-module.exports = csvDelete;
+module.exports = csvEdit;

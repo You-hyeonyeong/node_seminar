@@ -4,7 +4,6 @@ const csvWrite = {
     csvWrite : (jsonArray, fileName) =>{
         const resultCsv = json2csv.parse(jsonArray);
         console.log(resultCsv);
-
         fs.writeFile(fileName, resultCsv, (err) => {
             if (err) {
                 console.log("file save err");

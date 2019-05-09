@@ -91,8 +91,7 @@ router.post('/', async (req, res) => {
         var pw = req.body.pw;
         cryptoModule.encryption(pw, function (result) {
             console.log(result);
-            
-            jsondata.salt = result.salt; //salt값 넣었구 ? 엥아니 왜 안들어 가는거야?
+            jsondata.salt = result.salt;
             //salt와 pw추가 jsondata에
             console.log(jsondata)
             mesJsonArr.push(jsondata)
@@ -109,23 +108,32 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
     //게시글 수정 (게시물 고유 id같은 게시물을 수정된 값으로 다시 저장)
-    // csvRead.csvRead(fileName).then((mesJsonArr) => {
-    //     const id = req.params.id;
-    //     const title = req.body.title;
-    //     const contents = req.body.
-    //     for(const idx in mesJsonArr) {
-    //         if(id == mesJsonArr[idx].id) {
-                
-    //         }
-    //     }
-    // }, (err) => {
-
-    // })
+    const jsondata = req.body;
+    csvRead.csvRead(fileName).then((mesJsonArr) => {
+        const id = req.params.id;
+        const title = req.body.title;
+        const contents = req.body.contents;
+        console.log(id, title, contents+"sssssssssssssssssss");
+        for(const idx in mesJsonArr) {
+            if(id == mesJsonArr[idx].id) {
+                jsondata.id = id;
+                jsondata.title = title;
+                jsondata.contents = contents;
+                console.log(jsondata.id, jsondata.title, jsondata.contents+"ddddddddddddddd");
+                csvWrite.csvWrite(mesJsonArr, fileName);
+                console.log("수정성공");
+                break;
+            } else {
+                console.log("수정실패");
+            }
+        }
+    }, (err) => {
+        console.log("실패실패실패");
+    })
 });
 
 router.delete('/:id', async (req, res) => {
     //게시물 삭제 (게시문 고유id와 같은 게시물 삭제)
-    //순차적으로 각 작업결과 다음 작업으로 넘기는 async.waterfull 사용해보쟈
     //csv파일 읽은다음에 id값 같은거 찾아서 지우기
         csvRead.csvRead(fileName).then((mesJsonArr) => {
             console.log(mesJsonArr);
