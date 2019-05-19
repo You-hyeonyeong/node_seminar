@@ -24,9 +24,13 @@ router.post('/', async(req, res) => {
     const boardPw = req.body.boardPw
     const writer = req.body.writer
 
+    //게시글 작성시간
     moment.tz.setDefault("Asia/Seoul");
     var date = moment().format('YYYY-MM-DD HH:mm:ss');
+    //게시글 패스워드 암호화
     const encrytionM = await encrytion.encrytion(boardPw);
+    //이사람 글 맞는지 확인 부터 해야해
+    const userQuery = 'SELECT id FROM user WHERE id = ?'
 
     const insertQuery = 'INSERT INTO board (title, content, writer, writetime, boardPw, salt) VALUES (?, ?, ?, ?, ?, ?)';
     const insertResult = await db.queryParam_Parse(insertQuery, [title, content, writer, date, boardPw, encrytionM.salt]);
@@ -36,6 +40,36 @@ router.post('/', async(req, res) => {
         res.status(200).send(defaultRes.successTrue(statusCode.OK, resMessage.POST_SUCCESS));
     }
 })
+/*
+    METHOD  : GET
+    url     : /homework/board
+    전체 게시물 가져오기
+*/
+router.get('/', async(req, res) => {
+    const getAllBoardQuery = 'SELECT * FROM board';
+    const getAllBoardResult = await db.queryParam_None(getAllBoardQuery);
 
+    if (!getAllBoardResult) { //쿼리문이 실패했을 때
+        res.status(200).send(defaultRes.successFalse(statusCode.DB_ERROR, resMessage.NO_POST));
+    } else { //쿼리문이 성공했을 때
+        res.status(200).send(defaultRes.successTrue(statusCode.OK, resMessage.POST_EXIST, getAllBoardResult));
+    }
+})
+/*
+    METHOD  : GET
+    url     : /homework/board
+    특정 게시물 가져오기
+*/
+router.get('/:id', async(req, res) => {
+    const boardIdx = req.params.id
+    const getAllUserQuery = 'SELECT * FROM user WHERE id = ?';
+    const getAllUserResult = await db.queryParam_Parse(getAllUserQuery,[boardIdx]);
+
+    if (!getAllBoardResult) { //쿼리문이 실패했을 때
+        res.status(200).send(defaultRes.successFalse(statusCode.DB_ERROR, resMessage.NO_POST));
+    } else { //쿼리문이 성공했을 때
+        res.status(200).send(defaultRes.successTrue(statusCode.OK, resMessage.POST_EXIST, getAllBoardResult));
+    }
+})
 
 module.exports = router;
