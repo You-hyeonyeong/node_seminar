@@ -50,7 +50,7 @@ router.get('/:id', async (req, res) => {
         // res.end();
 
     }, (err) => {
-        console.log("eerrrrrrrr");
+        console.log(err);
     })
 });
 
@@ -78,6 +78,7 @@ router.post('/', async (req, res) => {
         if (check == 1) {
             console.log(responseMessage.ALREADY_POST);
             res.write("sdf");
+            res.status(200).send(utils.successFalse);
             res.end();
             return
         }
@@ -89,6 +90,8 @@ router.post('/', async (req, res) => {
         jsondata.time = date;
         //salt값 생성
         var pw = req.body.pw;
+        console.log(`body = ${JSON.stringify(req.body)}`);
+        console.log(`pw = ${pw}`);
         cryptoModule.encryption(pw, function (result) {
             console.log(result);
             jsondata.salt = result.salt;
@@ -135,17 +138,20 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     //게시물 삭제 (게시문 고유id와 같은 게시물 삭제)
     //csv파일 읽은다음에 id값 같은거 찾아서 지우기
-        csvRead.csvRead(fileName).then((mesJsonArr) => {
-            console.log(mesJsonArr);
-            const id = req.params.id;
-            csvDelete.csvDelete(mesJsonArr,id).then((jsonArr) =>{
-                console.log(jsonArr);
-                csvWrite.csvWrite(jsonArr, fileName);
-            },(err) => {
-                console.log("delete 안됨")
-            })
-        }, (err) => {
-            console.log("읽어오는거 안됨")
-        });
+    const filefff = await csvRead.csvRead(fileName);
+    const dddd = await csvDelete.csvDelete(filefff, req.params.id);
+    console.log(dddd)
+        // csvRead.csvRead(fileName).then((mesJsonArr) => {
+        //     console.log(mesJsonArr);
+        //     const id = req.params.id;
+        //     csvDelete.csvDelete(mesJsonArr,id).then((jsonArr) =>{
+        //         console.log(jsonArr);
+        //         csvWrite.csvWrite(jsonArr, fileName);
+        //     },(err) => {
+        //         console.log("delete 안됨")
+        //     })
+        // }, (err) => {
+        //     console.log("읽어오는거 안됨")
+        // });
 });
 module.exports = router;

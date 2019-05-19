@@ -1,5 +1,6 @@
 const fs = require('fs');
 const json2csv = require('json2csv');
+//csv를 쓰는 모듈 
 const csvWrite = {
     csvWrite : (jsonArray, fileName) =>{
         const resultCsv = json2csv.parse(jsonArray);
