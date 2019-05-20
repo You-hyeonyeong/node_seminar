@@ -22,14 +22,12 @@ router.post('/', async(req, res) => {
     const getAllUserResult = await db.queryParam_Parse(getAllUserQuery,[id]);
 
     //비밀번호 같은지 확인
-    const hashedPw = await encrytion.onlyEncrytion(pw, getAllUserResult.salt)
-    console.log(`fffffffff${hashedPw}`)
-    console.log(`fffffffff${hashedPw.salt}`)
-    if(hashedPw.salt != getAllUserResult.password){
+    const hashedPw = await encrytion.onlyEncrytion(pw, getAllUserResult[0].salt)
+    if(hashedPw.hashedPassword != getAllUserResult[0].password){
         res.status(200).send(defaultRes.successFalse(statusCode.BAD_REQUEST, resMessage.MISS_MATCH_PW))
         return
     } else {
-        res.status(200).send(defaultRes.successFalse(statusCode.BAD_REQUEST, resMessage.LOGIN_SUCCESS))
+        res.status(200).send(defaultRes.successFalse(statusCode.OK, resMessage.LOGIN_SUCCESS))
     }
 
 

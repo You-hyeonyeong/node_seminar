@@ -22,24 +22,22 @@ router.post('/', async(req, res) => {
     const id = req.body.id;
     const name = req.body.name;
     const pw = req.body.password;
-    const selectDuplicationId = 'SELECT * FROM user id';
+    const selectDuplicationId = 'SELECT * FROM user WHERE id = ?';
     //중복id검사하는걸 만들어야해
     //body.id와 DB조회해서 같은 아이디 있으면 실패
-    // const getDuplicationId = await db.queryParam_None(selectDuplicationId);
-    // console.log(getDuplicationId);
-    // if (getDuplicationId != id) {
-    //     res.status(200).send(defaultRes.successFalse(statusCode.DB_ERROR, resMessage.MEMBERSHIP_INSERT_FAIL));
-    // } else { //쿼리문이 성공했을 때
-    //     console.log(getDuplicationId);
-    //     res.status(200).send(defaultRes.successTrue(statusCode.OK, resMessage.MEMBERSHIP_INSERT_SUCCESS));
-    // }
-    const encrytionResult = await encrytion.encrytion(pw);
-    const insertQuery = 'INSERT INTO user (id, name, password, salt) VALUES (?, ?, ?, ?)';
-    const insertResult = await db.queryParam_Parse(insertQuery, [id, name, encrytionResult.hashedPassword, encrytionResult.salt]);
-    if (!insertResult) {
-        res.status(200).send(defaultRes.successFalse(statusCode.OK, resMessage.MEMBERSHIP_TRANSAC_FAIL));
-    } else {
-        res.status(200).send(defaultRes.successTrue(statusCode.OK, resMessage.MEMBERSHIP_TRANSAC_SUCCESS));
+    const getDuplicationId = await db.queryParam_Parse(selectDuplicationId,[id]);
+    console.log(getDuplicationId);
+    if (getDuplicationId.length != 0) {
+        res.status(200).send(defaultRes.successFalse(statusCode.DB_ERROR, resMessage.ALREADY_USER));
+    } else { 
+        const encrytionResult = await encrytion.encrytion(pw);
+        const insertQuery = 'INSERT INTO user (id, name, password, salt) VALUES (?, ?, ?, ?)';
+        const insertResult = await db.queryParam_Parse(insertQuery, [id, name, encrytionResult.hashedPassword, encrytionResult.salt]);
+        if (!insertResult) {
+            res.status(200).send(defaultRes.successFalse(statusCode.OK, resMessage.FAIL));
+        } else {
+            res.status(200).send(defaultRes.successTrue(statusCode.OK, resMessage.CREATED_USER));
+        }
     }
 
 });

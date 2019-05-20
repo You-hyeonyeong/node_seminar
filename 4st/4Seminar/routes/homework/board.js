@@ -29,13 +29,13 @@ router.post('/', async(req, res) => {
     var date = moment().format('YYYY-MM-DD HH:mm:ss');
     //게시글 패스워드 암호화
     const encrytionM = await encrytion.encrytion(boardPw);
-    //이사람 글 맞는지 확인 부터 해야해
-    const userQuery = 'SELECT id FROM user WHERE id = ?'
-
+    const userQuery = 'SELECT * FROM user WHERE id = ?'
+    const selectResult = await db.queryParam_Parse(userQuery,[writer])
+    console.log(selectResult[0].userIdx);
     const insertQuery = 'INSERT INTO board (title, content, writer, writetime, boardPw, salt) VALUES (?, ?, ?, ?, ?, ?)';
-    const insertResult = await db.queryParam_Parse(insertQuery, [title, content, writer, date, boardPw, encrytionM.salt]);
+    const insertResult = await db.queryParam_Parse(insertQuery, [title, content, selectResult[0].userIdx, date, encrytionM.hashedPassword, encrytionM.salt]);
     if (!insertResult) {
-        res.status(200).send(defaultRes.successFalse(statusCode.OK, resMessage.POST_FAIL));
+        res.status(200).send(defaultRes.successFalse(statusCode.DB_ERROR, resMessage.POST_FAIL));
     } else {
         res.status(200).send(defaultRes.successTrue(statusCode.OK, resMessage.POST_SUCCESS));
     }
@@ -62,13 +62,14 @@ router.get('/', async(req, res) => {
 */
 router.get('/:id', async(req, res) => {
     const boardIdx = req.params.id
-    const getAllUserQuery = 'SELECT * FROM user WHERE id = ?';
+    const getAllUserQuery = 'SELECT * FROM board WHERE writer = ?';
     const getAllUserResult = await db.queryParam_Parse(getAllUserQuery,[boardIdx]);
+    console.log(getAllUserResult);
 
-    if (!getAllBoardResult) { //쿼리문이 실패했을 때
+    if (!getAllUserResult) { //쿼리문이 실패했을 때
         res.status(200).send(defaultRes.successFalse(statusCode.DB_ERROR, resMessage.NO_POST));
     } else { //쿼리문이 성공했을 때
-        res.status(200).send(defaultRes.successTrue(statusCode.OK, resMessage.POST_EXIST, getAllBoardResult));
+        res.status(200).send(defaultRes.successTrue(statusCode.OK, resMessage.POST_EXIST, getAllUserResult));
     }
 })
 

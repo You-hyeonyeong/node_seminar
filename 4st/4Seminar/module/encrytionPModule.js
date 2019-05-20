@@ -30,8 +30,6 @@ const encrytion = {
     },
     onlyEncrytion: (pw, salt) => {
         return new Promise((resolve, reject) => {
-            //salt생성
-            const salt = pw.toString('base64');
             //생성된 랜덤 값으로 salt 암호화
             crypto.pbkdf2(pw, salt, 10, 32, 'SHA512', (err, hashed) => {
                 if (err) {
