@@ -11,11 +11,12 @@ module.exports = {
     LOGIN_SUCCESS: "로그인 성공",
     LOGIN_FAIL: "로그인 실패",
 
-    POST_SUCCESS: "게시물작성 성공",
-    POST_FAIL: "게시물작성 실패",
+    POST_SUCCESS: "게시물 작성 성공",
+    POST_FAIL: "게시물 작성 실패",
     ALREADY_POST: "이미 게시글이 존재합니다.",
     REMOVED_BOARD : "게시글 지웠습니다.",
     NO_POST : "해당 게시글 없습니다.",
+    POST_EXIST : "게시물 조회 성공",
 
     FAIL : "내가 실패했어!",
     NO_VALUE : "값이 없어!"
